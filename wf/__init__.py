@@ -8,6 +8,7 @@ import subprocess
 
 from latch import small_task, workflow
 from latch.types import LatchFile, LatchDir
+from natsort import as_ascii
 
 from nupack import *  # Import NUPACK
 import matplotlib.pyplot as plt
@@ -25,20 +26,21 @@ def utilities(
     strand1: str = "ATGC",
     strand2: str = "ATGC",
     structure: str = "....",
-    material: str = Material.dna,
+    material: Material = Material.dna,
     temperature: float = 37.0,
     sodium: float = 1.0,
     magnesium: float = 0.0,
     outputDir: str = "output"
 ) -> LatchDir:
 
-    nt_model = Model(material=material, celsius=temperature, sodium=sodium, magnesium=magnesium)
+    nt_model = Model(material=str(material), celsius=temperature, sodium=sodium, magnesium=magnesium)
+    # partition_function = pfunc(strands=['CCC', 'GGG'], model=nt_model)
 
     content = f"""
         ----------OUTPUT----------
         {nt_model}{strand1}{strand2}{structure}
     """
-    
+
     return LatchDir(f"/root/{outputDir}", f"latch:///{outputDir}")
 
 @workflow
@@ -46,7 +48,7 @@ def utilitiesNUPACK(
     strand1: str = "ATGC",
     strand2: str = "ATGC",
     structure: str = "....",
-    material: str = Material.dna,
+    material: Material = Material.dna,
     temperature: float = 37.0,
     sodium: float = 1.0,
     magnesium: float = 0.0,
