@@ -35,7 +35,7 @@ def utilities(
     mfe_proxy_fn: bool = False,
     ensemble_size_fn: bool = False,
     ensemble_defect_fn: bool = False,
-    material: str = Material.dna,
+    material: str = Material.rna,
     ensemble: str = Ensemble.stacking,
     temperature: float = 37.0,
     sodium: float = 1.0,
@@ -53,7 +53,7 @@ def utilities(
 
     if pairs_fn == True:
         pairs_fn_val = pairs(strands=[strand1, strand2], model=nt_model)
-        pairs_fn_res = f"Equilibrium base pairing probabilities:\n{pairs_fn_val}"
+        pairs_fn_res = f"Equilibrium base pairing probabilities:\n\n{pairs_fn_val}"
 
     if mfe_proxy_fn == True:
         mfe_structures = mfe(strands=[strand1, strand2], model=nt_model)
@@ -61,11 +61,11 @@ def utilities(
             MFE Proxy Structure:
             Free energy of MFE proxy structure: {mfe_structures[0].energy}
             MFE proxy structure in dot-parens-plus notation: {mfe_structures[0].structure}
-            MFE proxy structure as structure matrix:\n{mfe_structures[0].structure.matrix()}
+            MFE proxy structure as structure matrix:\n\n{mfe_structures[0].structure.matrix()}
         """
     
     if ensemble_size_fn == True:
-        ensemble_size_fn_val = pairs(strands=[strand1, strand2], model=nt_model)
+        ensemble_size_fn_val = ensemble_size(strands=[strand1, strand2], model=nt_model)
         if ensemble == "stacking":
             ensemble_size_fn_res = f"Number of structures: {ensemble_size_fn_val}"
         elif ensemble == "nostacking":
@@ -79,38 +79,45 @@ def utilities(
     
     if structure_probability_fn == True:
         structure_probability_fn_val = structure_probability(strands=[strand1, strand2], structure=structure, model=nt_model)
-        structure_probability_fn_res = f"Structure free energy: {structure_probability_fn_val}"
+        structure_probability_fn_res = f"Equilibrium structure probability: {structure_probability_fn_val}"
     
     if ensemble_defect_fn == True:
         ensemble_defect_fn_val = defect(strands=[strand1, strand2], structure=structure, model=nt_model)
-        ensemble_defect_fn_res = f"Structure free energy: {ensemble_defect_fn_val}"
+        ensemble_defect_fn_res = f"Complex ensemble defect: {ensemble_defect_fn_val}"
 
 
     outFile = f"/root/{out}.txt"
 
     content = f"""
-        ----------SEQUENCE ONLY UTILITY RESULTS----------
-        {partition_fn_res}
-        {pairs_fn_res}
-        {mfe_proxy_fn_res}
-        {ensemble_size_fn_res}
+    ----------SEQUENCE ONLY UTILITY RESULTS----------
+    
+    {partition_fn_res}
 
-        ----------STRUCTURE UTILITY RESULTS----------
-        {structure_energy_fn_res}
-        {structure_probability_fn_res}
-        {ensemble_defect_fn_res}
+    {pairs_fn_res}
 
-        ----------INPUT SPECIFICATIONS----------
+    {mfe_proxy_fn_res}
 
-        Strand 1: {strand1}
-        Strand 2: {strand2}
-        Structure: {structure}
+    {ensemble_size_fn_res}
 
-        Nucleic acid parameter set: {material}
-        Ensemble Type: {ensemble}
-        Temperature: {temperature} °C
-        Na+: {sodium} M
-        Mg++: {magnesium} M
+    ----------STRUCTURE UTILITY RESULTS----------
+
+    {structure_energy_fn_res}
+
+    {structure_probability_fn_res}
+
+    {ensemble_defect_fn_res}
+
+    ----------INPUT SPECIFICATIONS----------
+
+    Strand 1: {strand1}
+    Strand 2: {strand2}
+    Structure: {structure}
+
+    Nucleic acid parameter set: {material}
+    Ensemble Type: {ensemble}
+    Temperature: {temperature} °C
+    Na+: {sodium} M
+    Mg++: {magnesium} M
     """
     with open(outFile, "w") as f:
         f.write(content)
@@ -129,8 +136,8 @@ def utilitiesNUPACK(
     mfe_proxy_fn: bool = False,
     ensemble_size_fn: bool = False,
     ensemble_defect_fn: bool = False,
-    material: str = Material.dna,
-    ensemble: str = Ensemble.stacking,
+    material: Material = Material.rna,
+    ensemble: Ensemble = Ensemble.stacking,
     temperature: float = 37.0,
     sodium: float = 1.0,
     magnesium: float = 0.0,
@@ -207,7 +214,7 @@ def utilitiesNUPACK(
             __metadata__:
                 display_name: "Partition Function"
                 _tmp:
-                    section_title: "Choose NUPACK Utility Functions"
+                    section_title: "Choose NUPACK Utility Functions - sequence input based functions"
                 appearance:
                     comment: "Compute the partition function https://www.google.com"
         pairs_fn:
@@ -228,6 +235,8 @@ def utilitiesNUPACK(
         structure_energy_fn:
             __metadata__:
                 display_name: "Structure Free Energy"
+                _tmp:
+                    section_title: "Choose NUPACK Utility Functions - sequence and structural input based functions"
                 appearance:
                     comment: "Calculate the structure energy"
         structure_probability_fn:
@@ -239,7 +248,7 @@ def utilitiesNUPACK(
             __metadata__:
                 display_name: "Complex Ensemble Defect"
                 appearance:
-                    comment: ""
+                    comment: "ED"
         ensemble:
             __metadata__:
                 display_name: "Ensemble Type"
