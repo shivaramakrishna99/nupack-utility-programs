@@ -159,35 +159,53 @@ def utilitiesNUPACK(
     magnesium: float = 0.0,
     out: str = "nupack-utils-results",
 ) -> LatchFile:
-    """Carry out NUPACK Utilities functions on a complex of sequences
+    """NUPACK Utilities for a complex formed between two nucleotide strands
 
     # NUPACK - Utility Algorithms and Calculations
     ---
 
+    ## **How to use**
+    ---
+
+    1. Specify the model by choosing the nucleic acid type. This parameter is based on parameter sets obtained from different research papers. Check them out [here](https://docs.nupack.org/model/#material)
+    
+    2. Specify the sequences of the first and second strand, followed by the structure of the complex in the dot bracket notation.
+
+    3. Select the utility functions that require sequence information only.
+
+    4. Select the utility functions that require sequence and structure information.
+
+    5. Specify any other changes in the construction of the Model() object using the hidden parameters such as ensemble type and ion concentrations. 
+
+    6. Run the workflow!
+
     ## **About**
     ---
+
     [NUPACK](https://docs.nupack.org/#about) is a growing software suite for the analysis and design of nucleic acid structures, devices, and systems serving the needs of researchers in the fields of nucleic acid nanotechnology, molecular programming, synthetic biology, and across the life sciences more broadly.
 
-    ## **Citations**
+     ## **Citations**
     ---
+
     ### NUPACK Analysis Algorithms
+
     **Complex analysis and test tube analysis**
-	- M.E. Fornace, N.J. Porubsky, and N.A. Pierce (2020). A unified dynamic programming framework for the analysis of interacting nucleic acid strands: enhanced models, scalability, and speed.  [ACS Synth Biol](https://pubs.acs.org/doi/abs/10.1021/acssynbio.9b00523) , 9:2665-2678, 2020. ( [pdf](http://www.nupack.org/downloads/serve_public_file/fornace20.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/fornace20_supp.pdf?type=pdf) )
+	
+    - M.E. Fornace, N.J. Porubsky, and N.A. Pierce (2020). A unified dynamic programming framework for the analysis of interacting nucleic acid strands: enhanced models, scalability, and speed.  [ACS Synth Biol](https://pubs.acs.org/doi/abs/10.1021/acssynbio.9b00523) , 9:2665-2678, 2020. ( [pdf](http://www.nupack.org/downloads/serve_public_file/fornace20.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/fornace20_supp.pdf?type=pdf) )
 	
     - R. M. Dirks, J. S. Bois, J. M. Schaeffer, E. Winfree, and N. A. Pierce. Thermodynamic analysis of interacting nucleic acid strands.  [SIAM Rev](http://epubs.siam.org/doi/abs/10.1137/060651100) , 49:65-88, 2007. ( [pdf](http://www.nupack.org/downloads/serve_public_file/sirev07.pdf?type=pdf) )
+    
     **Pseudoknot analysis**
 	
     - R. M. Dirks and N. A. Pierce. An algorithm for computing nucleic acid base-pairing probabilities including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.10296/abstract) , 25:1295-1304, 2004. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc04.pdf?type=pdf) )
 	
     - R. M. Dirks and N. A. Pierce. A partition function algorithm for nucleic acid secondary structure including pseudoknots.  [J Comput Chem](http://onlinelibrary.wiley.com/doi/10.1002/jcc.20057/abstract) , 24:1664-1677, 2003. ( [pdf](http://www.nupack.org/downloads/serve_public_file/jcc03.pdf?type=pdf) ,  [supp info](http://www.nupack.org/downloads/serve_public_file/jcc03_supp.pdf?type=pdf) )
 
-    1. **Workflow Repository** - https://github.com/shivaramakrishna99/nupack-loop-stack/
+    **Workflow Repository** - (https://github.com/shivaramakrishna99/nupack-utility-programs)
     
-    2. **Acknowledgements** - https://docs.nupack.org/#acknowledgments
+    **Acknowledgements** - (https://docs.nupack.org/#acknowledgments)
 
-    3. **License** - https://docs.nupack.org/#license
-    
-    4. **Citation** - https://docs.nupack.org/#citation
+    *Authored by Shivaramakrishna Srinivasan. Feel free to reach out to me at shivaramakrishna.srinivasan@gmail.com*
     ---
 
     __metadata__:
