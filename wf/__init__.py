@@ -46,23 +46,30 @@ def utilities(
     nt_model = Model(material=material, ensemble=ensemble, celsius=temperature, sodium=sodium, magnesium=magnesium)
 
     # Sequence-based Utility Functions
+    noinput = f"NOT CALCULATED"
 
     if partition_fn == True:
         partition_fn_val = pfunc(strands=[strand1, strand2], model=nt_model)
         partition_fn_res = f"Partition function:\n{partition_fn_val}"
+    else:
+        partition_fn_res = f"Partition function: {noinput}"
 
     if pairs_fn == True:
         pairs_fn_val = pairs(strands=[strand1, strand2], model=nt_model)
         pairs_fn_res = f"Equilibrium base pairing probabilities:\n\n{pairs_fn_val}"
+    else:
+        pairs_fn_res = f"Equilibrium base pairing probabilities: {noinput}"
 
     if mfe_proxy_fn == True:
         mfe_structures = mfe(strands=[strand1, strand2], model=nt_model)
         mfe_proxy_fn_res = f"""
-            MFE Proxy Structure:
-            Free energy of MFE proxy structure: {mfe_structures[0].energy}
-            MFE proxy structure in dot-parens-plus notation: {mfe_structures[0].structure}
-            MFE proxy structure as structure matrix:\n\n{mfe_structures[0].structure.matrix()}
-        """
+MFE Proxy Structure:
+    Free energy of MFE proxy structure: {mfe_structures[0].energy}
+    MFE proxy structure in dot-parens-plus notation: {mfe_structures[0].structure}
+    MFE proxy structure as structure matrix:\n\n{mfe_structures[0].structure.matrix()}
+"""
+    else:
+        mfe_proxy_fn_res = f"MFE Proxy Structure Results: {noinput}"
     
     if ensemble_size_fn == True:
         ensemble_size_fn_val = ensemble_size(strands=[strand1, strand2], model=nt_model)
@@ -70,55 +77,64 @@ def utilities(
             ensemble_size_fn_res = f"Number of structures: {ensemble_size_fn_val}"
         elif ensemble == "nostacking":
             ensemble_size_fn_res = f"Number of stacking states: {ensemble_size_fn_val}"
+    else:
+        ensemble_size_fn_res = f"Ensemble size results: {noinput}"
 
     # Structure-based Utility Functions
 
     if structure_energy_fn == True:
         structure_energy_fn_val = structure_energy(strands=[strand1, strand2], structure=structure, model=nt_model)
         structure_energy_fn_res = f"Structure free energy: {structure_energy_fn_val}"
+    else:
+        structure_energy_fn_res = f"Structure free energy: {noinput}"
     
     if structure_probability_fn == True:
         structure_probability_fn_val = structure_probability(strands=[strand1, strand2], structure=structure, model=nt_model)
         structure_probability_fn_res = f"Equilibrium structure probability: {structure_probability_fn_val}"
+    else:
+        structure_probability_fn_res = f"Equilibrium structure probability: {noinput}"
     
     if ensemble_defect_fn == True:
         ensemble_defect_fn_val = defect(strands=[strand1, strand2], structure=structure, model=nt_model)
         ensemble_defect_fn_res = f"Complex ensemble defect: {ensemble_defect_fn_val}"
+    else:
+        ensemble_defect_fn_res = f"Complex ensemble defect: {noinput}"
 
 
-    outFile = f"/root/{out}.txt"
+
+    outFile = f"/{out}.txt"
 
     content = f"""
-    ----------SEQUENCE ONLY UTILITY RESULTS----------
+----------SEQUENCE ONLY UTILITY RESULTS----------
     
-    {partition_fn_res}
+{partition_fn_res}
 
-    {pairs_fn_res}
+{pairs_fn_res}
 
-    {mfe_proxy_fn_res}
+{mfe_proxy_fn_res}
 
-    {ensemble_size_fn_res}
+{ensemble_size_fn_res}
 
-    ----------STRUCTURE UTILITY RESULTS----------
+----------STRUCTURE UTILITY RESULTS----------
 
-    {structure_energy_fn_res}
+{structure_energy_fn_res}
 
-    {structure_probability_fn_res}
+{structure_probability_fn_res}
 
-    {ensemble_defect_fn_res}
+{ensemble_defect_fn_res}
 
-    ----------INPUT SPECIFICATIONS----------
+----------INPUT SPECIFICATIONS----------
 
-    Strand 1: {strand1}
-    Strand 2: {strand2}
-    Structure: {structure}
+Strand 1: {strand1}
+Strand 2: {strand2}
+Structure: {structure}
 
-    Nucleic acid parameter set: {material}
-    Ensemble Type: {ensemble}
-    Temperature: {temperature} °C
-    Na+: {sodium} M
-    Mg++: {magnesium} M
-    """
+Nucleic acid parameter set: {material}
+Ensemble Type: {ensemble}
+Temperature: {temperature} °C
+Na+: {sodium} M
+Mg++: {magnesium} M
+"""
     with open(outFile, "w") as f:
         f.write(content)
     
