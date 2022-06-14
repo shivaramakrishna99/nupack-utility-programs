@@ -4,10 +4,8 @@ Carry out all NUPACK's Utilities functions
 
 from enum import Enum
 from pathlib import Path
-import subprocess
-
 from latch import small_task, workflow
-from latch.types import LatchFile, LatchDir
+from latch.types import LatchFile
 from natsort import as_ascii
 
 from nupack import *  # Import NUPACK
@@ -27,53 +25,117 @@ class Ensemble(Enum):
 
 @small_task
 def utilities(
-    strand1: str = "ATGC",
-    strand2: str = "ATGC",
-    structure: str = "....",
-    pfunc: bool = False,
-    structure_energy: bool = False,
-    structure_probability: bool = False,
-    pairs: bool = False,
-    mfe: bool = False,
-    ensemble_size: bool = False,
-    defect: bool = False,
+    strand1: str = "CCC",
+    strand2: str = "GGG",
+    structure: str = "(((+)))",
+    partition_fn: bool = False,
+    structure_energy_fn: bool = False,
+    structure_probability_fn: bool = False,
+    pairs_fn: bool = False,
+    mfe_proxy_fn: bool = False,
+    ensemble_size_fn: bool = False,
+    ensemble_defect_fn: bool = False,
     material: str = Material.dna,
     ensemble: str = Ensemble.stacking,
     temperature: float = 37.0,
     sodium: float = 1.0,
     magnesium: float = 0.0,
-    outputDir: str = "output"
-) -> LatchDir:
+    out: str = "nupack-utils-results",
+) -> LatchFile:
 
-    nt_model = Model(material=material, celsius=temperature, sodium=sodium, magnesium=magnesium)
-    # partition_function = pfunc(strands=['CCC', 'GGG'], model=nt_model)
+    nt_model = Model(material=material, ensemble=ensemble, celsius=temperature, sodium=sodium, magnesium=magnesium)
+
+    # Sequence-based Utility Functions
+
+    if partition_fn == True:
+        partition_fn_val = pfunc(strands=[strand1, strand2], model=nt_model)
+        partition_fn_res = f"Partition function:\n{partition_fn_val}"
+
+    if pairs_fn == True:
+        pairs_fn_val = pairs(strands=[strand1, strand2], model=nt_model)
+        pairs_fn_res = f"Equilibrium base pairing probabilities:\n{pairs_fn_val}"
+
+    if mfe_proxy_fn == True:
+        mfe_structures = mfe(strands=[strand1, strand2], model=nt_model)
+        mfe_proxy_fn_res = f"""
+            MFE Proxy Structure:
+            Free energy of MFE proxy structure: {mfe_structures[0].energy}
+            MFE proxy structure in dot-parens-plus notation: {mfe_structures[0].structure}
+            MFE proxy structure as structure matrix:\n{mfe_structures[0].structure.matrix()}
+        """
+    
+    if ensemble_size_fn == True:
+        ensemble_size_fn_val = pairs(strands=[strand1, strand2], model=nt_model)
+        if ensemble == "stacking":
+            ensemble_size_fn_res = f"Number of structures: {ensemble_size_fn_val}"
+        elif ensemble == "nostacking":
+            ensemble_size_fn_res = f"Number of stacking states: {ensemble_size_fn_val}"
+
+    # Structure-based Utility Functions
+
+    if structure_energy_fn == True:
+        structure_energy_fn_val = structure_energy(strands=[strand1, strand2], structure=structure, model=nt_model)
+        structure_energy_fn_res = f"Structure free energy: {structure_energy_fn_val}"
+    
+    if structure_probability_fn == True:
+        structure_probability_fn_val = structure_probability(strands=[strand1, strand2], structure=structure, model=nt_model)
+        structure_probability_fn_res = f"Structure free energy: {structure_probability_fn_val}"
+    
+    if ensemble_defect_fn == True:
+        ensemble_defect_fn_val = defect(strands=[strand1, strand2], structure=structure, model=nt_model)
+        ensemble_defect_fn_res = f"Structure free energy: {ensemble_defect_fn_val}"
+
+
+    outFile = f"/root/{out}.txt"
 
     content = f"""
-        ----------OUTPUT----------
-        {nt_model}{strand1}{strand2}{structure}
-    """
+        ----------SEQUENCE ONLY UTILITY RESULTS----------
+        {partition_fn_res}
+        {pairs_fn_res}
+        {mfe_proxy_fn_res}
+        {ensemble_size_fn_res}
 
-    return LatchDir(f"/root/{outputDir}", f"latch:///{outputDir}")
+        ----------STRUCTURE UTILITY RESULTS----------
+        {structure_energy_fn_res}
+        {structure_probability_fn_res}
+        {ensemble_defect_fn_res}
+
+        ----------INPUT SPECIFICATIONS----------
+
+        Strand 1: {strand1}
+        Strand 2: {strand2}
+        Structure: {structure}
+
+        Nucleic acid parameter set: {material}
+        Ensemble Type: {ensemble}
+        Temperature: {temperature} °C
+        Na+: {sodium} M
+        Mg++: {magnesium} M
+    """
+    with open(outFile, "w") as f:
+        f.write(content)
+    
+    return LatchFile(outFile, f"latch:///{outFile}")
 
 @workflow
 def utilitiesNUPACK(
-    strand1: str = "ATGC",
-    strand2: str = "ATGC",
-    structure: str = "....",
-    pfunc: bool = False,
-    structure_energy: bool = False,
-    structure_probability: bool = False,
-    pairs: bool = False,
-    mfe: bool = False,
-    ensemble_size: bool = False,
-    defect: bool = False,
+    strand1: str = "CCC",
+    strand2: str = "GGG",
+    structure: str = "(((+)))",
+    partition_fn: bool = False,
+    structure_energy_fn: bool = False,
+    structure_probability_fn: bool = False,
+    pairs_fn: bool = False,
+    mfe_proxy_fn: bool = False,
+    ensemble_size_fn: bool = False,
+    ensemble_defect_fn: bool = False,
     material: str = Material.dna,
     ensemble: str = Ensemble.stacking,
     temperature: float = 37.0,
     sodium: float = 1.0,
     magnesium: float = 0.0,
-    outputDir: str = "nupack-utils-run"
-) -> LatchDir:
+    out: str = "nupack-utils-results",
+) -> LatchFile:
     """Carry out NUPACK Utilities functions on a complex of sequences
 
     # NUPACK - Utility Algorithms and Calculations
@@ -119,77 +181,65 @@ def utilitiesNUPACK(
             id: BSD-3-Clause
 
     Args:
-    
         material:
             __metadata__:
                 display_name: "Nucleic Acid Type"
                 _tmp:
-                    section_title: Sequence and Structure Details
+                    section_title: "Sequence and Structure Details"
                 appearance:
                     comment: "Choose between DNA and RNA free energy parameter sets. Default is 'rna', based on Matthews et al., 1999"
-
         strand1:
             __metadata__:
                 display_name: "Strand 1 (as nucleotides)"
                 appearance:
                     comment: "Enter the nucleotide sequence of the first strand"
-
         strand2:
             __metadata__:
                 display_name: "Strand 2 (as nucleotides)"
                 appearance:
                     comment: "Enter the nucleotide sequence of the second strand"
-
         structure:
             __metadata__:
                 display_name: "Structure of Complex (in regular/extended dot-bracket notation)"
                 appearance:
                     comment: "Enter the dot bracket notation of the intended structure"
-
-        pfunc:
+        partition_fn:
             __metadata__:
                 display_name: "Partition Function"
                 _tmp:
-                    section_title: Choose NUPACK Utility Functions
+                    section_title: "Choose NUPACK Utility Functions"
                 appearance:
                     comment: "Compute the partition function https://www.google.com"
-
-        structure_energy:
-            __metadata__:
-                display_name: "Structure Free Energy"
-                appearance:
-                    comment: "Calculate the structure energy"
-
-        structure_probability:
-            __metadata__:
-                display_name: "Equilibrium Structure Probability"
-                appearance:
-                    comment: ""
-
-        pairs:
+        pairs_fn:
             __metadata__:
                 display_name: "Equilibrium Base Pairing Probabilities"
                 appearance:
                     comment: ""
-
-        mfe:
+        mfe_proxy_fn:
             __metadata__:
                 display_name: "MFE Proxy Structure(s)"
                 appearance:
                     comment: ""
-
-        ensemble_size:
+        ensemble_size_fn:
             __metadata__:
                 display_name: "Complex Ensemble Size"
                 appearance:
                     comment: ""
-
-        defect:
+        structure_energy_fn:
             __metadata__:
-                display_name: "Complex Ensemble Size"
+                display_name: "Structure Free Energy"
+                appearance:
+                    comment: "Calculate the structure energy"
+        structure_probability_fn:
+            __metadata__:
+                display_name: "Equilibrium Structure Probability"
                 appearance:
                     comment: ""
-
+        ensemble_defect_fn:
+            __metadata__:
+                display_name: "Complex Ensemble Defect"
+                appearance:
+                    comment: ""
         ensemble:
             __metadata__:
                 display_name: "Ensemble Type"
@@ -198,7 +248,6 @@ def utilitiesNUPACK(
                     hidden: true
                 appearance:
                     comment: "Choose between stacking and non stacking ensemble states. Default is set to 'stacking'."
-
         temperature:
             __metadata__:
                 display_name: "Temperature (in degree Celsius)"
@@ -206,7 +255,6 @@ def utilitiesNUPACK(
                     hidden: true
                 appearance:
                     comment: "Temperature of system. Default is 37 °C"
-
         sodium:
             __metadata__:
                 display_name: "Na+ concentration (in M)"
@@ -214,7 +262,6 @@ def utilitiesNUPACK(
                     hidden: true
                 appearance:
                     comment: "The sum of the concentrations of (monovalent) sodium, potassium, and ammonium ions, is specified in units of molar. Default: 1.0, Range: [0.05,1.1]"
-
         magnesium:
             __metadata__:
                 display_name: "Mg++ (in nM). Default is 0 nM"
@@ -222,30 +269,29 @@ def utilitiesNUPACK(
                     hidden: true
                 appearance:
                     comment: "The concentration of (divalent) magnesium ions, is specified in units of molar. Default: 0.0, Range: [0.0,0.2]"
-
-        outputDir:
+        out:
             __metadata__:
-                display_name: "Output Name"
+                display_name: "Output File Name"
                 _tmp:
-                    section_title: Output Specification
+                    section_title: Output
                 appearance:
-                    comment: "Specify the name of your output directory."
+                    comment: "Name your file containing results from chosen NUPACK Utility Programs"
     """
     return utilities(
     strand1=strand1,
     strand2=strand2,
     structure=structure,
-    pfunc=pfunc,
-    structure_energy=structure_energy,
-    structure_probability=structure_probability,
-    pairs=pairs,
-    mfe=mfe,
-    ensemble_size=ensemble_size,
-    defect=defect,
+    partition_fn=partition_fn,
+    structure_energy_fn=structure_energy_fn,
+    structure_probability_fn=structure_probability_fn,
+    pairs_fn=pairs_fn,
+    mfe_proxy_fn=mfe_proxy_fn,
+    ensemble_size_fn=ensemble_size_fn,
+    ensemble_defect_fn=ensemble_defect_fn,
     material=material,
     ensemble=ensemble,
     temperature=temperature,
     sodium=sodium,
     magnesium=magnesium,
-    outputDir=outputDir,
+    out=out
     )
