@@ -212,9 +212,9 @@ def utilitiesNUPACK(
         display_name: NUPACK - Utility Functions
         
         author:
-            name: The NUPACK Team
-            email: support@nupack.org
-            github: https://github.com/beliveau-lab/NUPACK
+            name: Shivaramakrishna Srinivasan
+            email: shivaramakrishna.srinivasan@gmail.com
+            github: https://github.com/shivaramakrishna99
         
         repository: https://github.com/beliveau-lab/NUPACK
         
